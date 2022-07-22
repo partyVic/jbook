@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import * as esbuild from 'esbuild-wasm'
 import { unpkgPathPlugin } from './plugins/unpkg-path-plugin'
+import { fetchPlugin } from './plugins/fetch-plugin'
 
 const App = () => {
 
@@ -18,7 +19,7 @@ const App = () => {
     // use ref.current to store the value can be access as global variable inside of the component
     ref.current = await esbuild.startService({
       worker: true,
-      wasmURL: '/esbuild.wasm',   //esbuild.wasm is from React public folder
+      wasmURL: 'https://unpkg.com/esbuild-wasm@0.8.27/esbuild.wasm',
     });
 
   };
@@ -45,9 +46,12 @@ const App = () => {
       entryPoints: ['index.js'],
       bundle: true,
       write: false,
-      plugins: [unpkgPathPlugin()],
+      plugins: [
+        unpkgPathPlugin(),
+        fetchPlugin(input)
+      ],
       define: {
-        'process.env.NODE_ENV': '"production"',  // use '"prodection" means replace the string of production, not the variable of prodection
+        'process.env.NODE_ENV': '"production"',  // use '"production" means replace the string of production, not the variable of prodection
         global: 'window'
       }
     })
