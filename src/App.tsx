@@ -8,11 +8,12 @@ const App = () => {
   // use useRef instead of useState for reasons of:
   // 1. Not cause rerendering
   // 2. The value it stores can be access anywhere inside of the component
-  // 3/ ref value will lost between a component mount/unmount
+  // 3. ref value will lost between a component mount/unmount
   const ref = useRef<any>()
 
+  const iframe = useRef<any>()
+
   const [input, setInput] = useState('')
-  const [code, setCode] = useState('')
 
 
   const startService = async () => {
@@ -34,6 +35,10 @@ const App = () => {
     if (!ref.current) {
       return
     }
+
+    // reset the iframe ref to default html if anyone changes the html element
+    iframe.current.srcdoc = html;
+
 
     // transform/transpire the jsx code into pure javascript in the browser
     // const result = await ref.current.transform(input, {
@@ -58,8 +63,33 @@ const App = () => {
 
     // console.log(result)
 
-    setCode(result.outputFiles[0].text)
+    // setCode(result.outputFiles[0].text)
+
+    // child document used postMessage to enables cross-origin communication between Window objects
+    // "*" means any origin
+    iframe.current.contentWindow.postMessage(result.outputFiles[0].text, '*');
   }
+
+
+  const html = `
+    <html>
+      <head></head>
+      <body>
+        <div id="root"></div>
+        <script>
+          window.addEventListener('message', (event) => {
+            try {
+              eval(event.data);
+            } catch (err) {
+              const root = document.querySelector('#root');
+              root.innerHTML = '<div style="color: red;"><h4>Runtime Error</h4>' + err + '</div>';
+              console.error(err);
+            }
+          }, false);
+        </script>
+      </body>
+    </html>
+  `;
 
   return (
     <div>
@@ -70,7 +100,9 @@ const App = () => {
       <div>
         <button onClick={onClick}>Submit</button>
       </div>
-      <pre>{code}</pre>
+
+      <iframe title='preview' ref={iframe} sandbox="allow-scripts" srcDoc={html} />
+
     </div>
   )
 }
