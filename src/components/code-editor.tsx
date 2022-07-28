@@ -3,6 +3,7 @@ import MonacoEditor, { OnMount, Monaco } from "@monaco-editor/react";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
 import prettier from 'prettier'
 import parserBabel from "prettier/parser-babel";
+import './code-editor.css'
 
 interface CodeEditorProps {
     initialValue: string
@@ -39,7 +40,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ onChange, initialValue }) => {
                 useTabs: false,
                 semi: true,
                 singleQuote: true,
-            });
+            }).replace(/\n$/, '')   // auto format will create a new line at the end. use RegEx to remove the new line
 
             // set the formatted value back in the editor
             editorRef.current.setValue(formatted);
@@ -47,8 +48,13 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ onChange, initialValue }) => {
     };
 
     return (
-        <div>
-            <button onClick={onFormatClick}>Format</button>
+        <div className='editor-wrapper'>
+            <button
+                className='button button-format is-primary is-small'
+                onClick={onFormatClick}
+            >
+                Format
+            </button>
 
             <MonacoEditor
                 height={500}
