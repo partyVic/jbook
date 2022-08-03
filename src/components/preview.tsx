@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 
 interface PreviewProps {
-    code: string
+  code: string
 }
 
 
@@ -28,27 +28,28 @@ const html = `
 
 const Preview: React.FC<PreviewProps> = ({ code }) => {
 
-    const iframe = useRef<any>()
+  const iframe = useRef<any>()
 
-    useEffect(() => {
+  useEffect(() => {
 
-        // reset the iframe ref to default html if anyone changes the html element
-        iframe.current.srcdoc = html;
+    // reset the iframe ref to default html if anyone changes the html element
+    iframe.current.srcdoc = html;
 
-        // child document used postMessage to enables cross-origin communication between Window objects
-        // "*" means any origin
-        iframe.current.contentWindow.postMessage(code, '*');
+    // child document used postMessage to enables cross-origin communication between Window objects
+    // "*" means any origin
+    iframe.current.contentWindow.postMessage(code, '*');
 
-    }, [code])
+  }, [code])
 
-    return (
-        <iframe
-            title='preview'
-            ref={iframe}
-            sandbox="allow-scripts"
-            srcDoc={html}
-        />
-    )
+  return (
+    <iframe
+      style={{ backgroundColor: 'white', pointerEvents:'none' }}
+      title='preview'
+      ref={iframe}
+      sandbox="allow-scripts"
+      srcDoc={html}
+    />
+  )
 }
 
 export default Preview

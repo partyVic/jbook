@@ -57,7 +57,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ onChange, initialValue }) => {
             </button>
 
             <MonacoEditor
-                height={500}
+                height='100%'
                 onMount={onEditorDidMount}
                 value={initialValue}      // this is ONLY for setting up initial value. NOT used for value update
                 language='javascript'
