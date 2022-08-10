@@ -16,10 +16,21 @@ const CodeCell = () => {
   const [input, setInput] = useState('')
 
 
-  const onClick = async () => {
-    const output = await bundle(input)
-    setCode(output)
-  }
+  // debouncing
+  // only bundle once user stop input after 750ms
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      const output = await bundle(input);
+      setCode(output);
+    }, 750);
+
+    //! use the return function inside of useEffect is a build-in feature
+    //! if return a function, then it will be called automatically the next time usEffect is called
+    // clear the timer when user start input( [input] changes)
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [input]);
 
 
   return (
@@ -31,7 +42,7 @@ const CodeCell = () => {
 
         <Resizable direction='horizontal'>
           <CodeEditor
-            initialValue='hello'
+            initialValue='const a = 1'
             onChange={(value) => setInput(value)}
           />
         </Resizable>

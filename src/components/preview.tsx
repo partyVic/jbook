@@ -38,8 +38,11 @@ const Preview: React.FC<PreviewProps> = ({ code }) => {
 
     // child document used postMessage to enables cross-origin communication between Window objects
     // "*" means any origin
-    iframe.current.contentWindow.postMessage(code, '*');
-
+    // use setTimeout is to make sure the browser has enough time to update the srcdoc and set up
+    // a event listener inside 
+    setTimeout(() => {
+      iframe.current.contentWindow.postMessage(code, '*');
+    }, 50);
   }, [code])
 
   return (
