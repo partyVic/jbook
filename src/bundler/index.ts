@@ -17,22 +17,36 @@ const bundle = async (rawCode: string) => {
 
 
     // bundle all the import linked files into one file
-    const result = await service.build({
-        entryPoints: ['index.js'],
-        bundle: true,
-        write: false,
-        plugins: [
-            unpkgPathPlugin(),
-            fetchPlugin(rawCode)
-        ],
-        define: {
-            'process.env.NODE_ENV': '"production"',  // use '"production" means replace the string of production, not the variable of prodection
-            global: 'window'
+    try {
+        const result = await service.build({
+            entryPoints: ['index.js'],
+            bundle: true,
+            write: false,
+            plugins: [
+                unpkgPathPlugin(),
+                fetchPlugin(rawCode)
+            ],
+            define: {
+                'process.env.NODE_ENV': '"production"',  // use '"production" means replace the string of production, not the variable of prodection
+                global: 'window'
+            }
+        })
+
+        return {
+            code: result.outputFiles[0].text,
+            err: '',
+        };
+
+    } catch (err) {
+        if (err instanceof Error) {
+            return {
+                code: "",
+                err: err.message,
+            };
+        } else {
+            throw err;
         }
-    })
-
-
-    return result.outputFiles[0].text
+    }
 }
 
 export default bundle

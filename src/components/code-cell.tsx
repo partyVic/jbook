@@ -13,6 +13,7 @@ const CodeCell = () => {
   // const ref = useRef<any>()
 
   const [code, setCode] = useState('')
+  const [err, setErr] = useState('');
   const [input, setInput] = useState('')
 
 
@@ -21,7 +22,8 @@ const CodeCell = () => {
   useEffect(() => {
     const timer = setTimeout(async () => {
       const output = await bundle(input);
-      setCode(output);
+      setCode(output.code);
+      setErr(output.err);
     }, 750);
 
     //! use the return function inside of useEffect is a build-in feature
@@ -49,6 +51,7 @@ const CodeCell = () => {
 
         <Preview
           code={code}
+          err={err}
         />
       </div>
     </Resizable>
