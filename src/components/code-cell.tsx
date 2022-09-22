@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import CodeEditor from './code-editor'
 import Preview from './preview'
-import bundle from '../bundler'
 import Resizable from './resizable'
 import { Cell } from '../state';
 import { useActions } from '../hooks/use-actions';
+import { useTypedSelector } from '../hooks/use-typed-selector'
+import './code-cell.css';
 
 interface CodeCellProps {
   cell: Cell;
@@ -18,20 +19,31 @@ const CodeCell: React.FC<CodeCellProps> = ({ cell }) => {
   // 3. ref value will lost between a component mount/unmount
   // const ref = useRef<any>()
 
-  const [code, setCode] = useState('')
-  const [err, setErr] = useState('');
+  // const [code, setCode] = useState('')
+  // const [err, setErr] = useState('');
   // const [input, setInput] = useState('')
-  
-  const { updateCell } = useActions();
+
+  const { updateCell, createBundle } = useActions();
+
+  //! add "!" after "state.bundles" to tell TypeScript that you will never pass an undefined value there. 
+  const bundle = useTypedSelector((state) => state.bundles![cell.id]);
 
 
-  // debouncing
-  // only bundle once user stop input after 750ms
+
   useEffect(() => {
+    if (!bundle) {
+      createBundle(cell.id, cell.content)
+      return
+    }
+
+    //! debouncing
+    // only bundle once user stop input after 750ms
     const timer = setTimeout(async () => {
-      const output = await bundle(cell.content);
-      setCode(output.code);
-      setErr(output.err);
+      // const output = await bundle(cell.content);
+      // setCode(output.code);
+      // setErr(output.err);
+
+      createBundle(cell.id, cell.content)
     }, 750);
 
     //! use the return function inside of useEffect is a build-in feature
@@ -40,7 +52,11 @@ const CodeCell: React.FC<CodeCellProps> = ({ cell }) => {
     return () => {
       clearTimeout(timer);
     };
-  }, [cell.content]);
+
+    //! don't put bundle as dependency in useEffect, it may cause infinite loop
+    // use below to disable react warning
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cell.content, cell.id, createBundle]);
 
 
   return (
@@ -58,10 +74,19 @@ const CodeCell: React.FC<CodeCellProps> = ({ cell }) => {
           />
         </Resizable>
 
-        <Preview
-          code={code}
-          err={err}
-        />
+        <div className="progress-wrapper">
+          {!bundle || bundle.loading
+            ? (
+              <div className="progress-cover">
+                <progress className="progress is-small is-primary" max="100">
+                  Loading
+                </progress>
+              </div>
+            )
+            : (
+              <Preview code={bundle.code} err={bundle.err} />
+            )}
+        </div>
       </div>
     </Resizable>
   )
